@@ -5,7 +5,7 @@ description = "Automated MLOps platform that ingests crypto market data, trains 
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
-authors = [{ name = "Adriano Munhoz" }]
+authors = [{ name = "Juan Munhoz", email = "juanmunhoz@outlook.com" }]
 keywords = ["mlops", "machine-learning", "crypto", "fastapi", "mlflow", "prefect"]
 
 dependencies = [
