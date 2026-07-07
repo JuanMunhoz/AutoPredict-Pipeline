@@ -309,6 +309,39 @@ make format  # auto-fix
 
 ---
 
+## 📊 Results
+
+Numbers below come from a **real end-to-end run** against the live free APIs
+(Binance + Fear & Greed), not synthetic data.
+
+**Dataset** — 365 days of 1h candles per asset → **8,760 raw candles**, reduced to
+**8,657 supervised samples × 34 engineered features** after indicator warm-up and
+leakage-safe labelling. Model: LightGBM. Split: chronological 80/20 holdout with
+5-fold walk-forward CV.
+
+| Asset | Holdout ROC-AUC | Holdout Accuracy | Walk-forward CV AUC | Promotion gate |
+|-------|:---------------:|:----------------:|:-------------------:|:--------------:|
+| BTC   | 0.484 | 0.477 | 0.513 | ❌ **Rejected** |
+| SOL   | 0.492 | 0.489 | 0.520 | ❌ **Rejected** |
+
+> ### Why rejected is the right outcome
+> Both models score around **AUC ≈ 0.5** — statistically indistinguishable from a
+> coin flip. That is the *expected* result: short-horizon crypto direction is
+> close to an efficient market, and these public features carry little edge.
+>
+> The point of this project is **not** to beat the market — it is to demonstrate a
+> production MLOps system that behaves correctly. The **promotion gate did exactly
+> its job**: it refused to ship a near-random model to production. A pipeline that
+> promoted a 0.48-AUC model would be the real red flag. Beating the bar is a
+> modelling problem (see the roadmap); **governing what reaches production is the
+> engineering problem this repo solves.**
+>
+> To experiment, lower `promotion_gate.min_roc_auc` in `configs/config.yaml` and
+> re-run `autopredict train` — the gate, registry and (local) model store will
+> then persist and serve a candidate.
+
+---
+
 ## 🗺 Roadmap
 
 - [ ] Hyperparameter optimisation with Optuna, logged to MLflow.
