@@ -1,0 +1,11 @@
+[core]
+    remote = supabase
+    autostage = true
+
+# Supabase Storage exposes an S3-compatible endpoint. Credentials are NOT stored
+# here — they are injected at runtime via env vars (AWS_ACCESS_KEY_ID /
+# AWS_SECRET_ACCESS_KEY) or `dvc remote modify --local`.
+['remote "supabase"']
+    url = s3://autopredict/dvc
+    endpointurl = https://your-project-ref.supabase.co/storage/v1/s3
+    region = us-east-1

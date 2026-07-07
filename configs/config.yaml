@@ -1,0 +1,46 @@
+# -----------------------------------------------------------------------------
+# Non-secret, versioned configuration. Secrets live in .env only.
+# Loaded by autopredict.config.settings and merged over defaults.
+# -----------------------------------------------------------------------------
+
+assets:
+  - symbol: BTC
+    coingecko_id: bitcoin
+    binance_symbol: BTCUSDT
+  - symbol: SOL
+    coingecko_id: solana
+    binance_symbol: SOLUSDT
+
+ingestion:
+  ohlcv_interval: 1h
+  history_days: 365          # how much OHLCV history to pull for training
+  include_fear_greed: true
+
+features:
+  # Technical indicator windows (in candles).
+  rsi_period: 14
+  ema_windows: [9, 21, 50]
+  sma_windows: [20, 50, 100]
+  macd: { fast: 12, slow: 26, signal: 9 }
+  bollinger: { window: 20, num_std: 2 }
+  return_lags: [1, 2, 3, 6, 12, 24]
+  volatility_windows: [6, 12, 24]
+
+label:
+  horizon_hours: 4           # predict direction 4h ahead
+  # A candle is labelled UP if future return > deadband, DOWN otherwise.
+  deadband: 0.0
+
+training:
+  test_size: 0.2             # time-ordered holdout fraction
+  n_splits: 5               # walk-forward CV splits
+  random_state: 42
+
+promotion_gate:
+  min_roc_auc: 0.55
+  min_accuracy: 0.52
+  improvement_margin: 0.005  # must beat current Production AUC by this much
+
+monitoring:
+  reports_dir: reports
+  drift_threshold: 0.5       # share of drifted features that triggers an alert

@@ -1,0 +1,85 @@
+name: Scheduled Retrain
+
+# Closes the MLOps loop: on a schedule (and on demand) pull fresh data, run the
+# full pipeline, and — only if a model was promoted by the gate — version the
+# artifacts (DVC push) and trigger a redeploy.
+
+on:
+  schedule:
+    - cron: "0 */4 * * *"   # every 4 hours, matching the prediction horizon
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: retrain
+  cancel-in-progress: false
+
+jobs:
+  retrain:
+    name: Ingest → train → gate → version
+    runs-on: ubuntu-latest
+    env:
+      APP_ENV: production
+      APP_LOG_JSON: "true"
+      MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY }}
+      APP_S3_ENDPOINT_URL: ${{ secrets.S3_ENDPOINT_URL }}
+    outputs:
+      promoted: ${{ steps.train.outputs.promoted }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+
+      - name: Install project
+        run: uv sync --all-extras
+
+      - name: Hydrate prior datasets/models (DVC)
+        run: |
+          uv run dvc remote modify --local supabase access_key_id "$AWS_ACCESS_KEY_ID"
+          uv run dvc remote modify --local supabase secret_access_key "$AWS_SECRET_ACCESS_KEY"
+          uv run dvc pull || echo "First run — nothing to pull yet."
+
+      - name: Ingest & build features
+        run: |
+          uv run autopredict ingest
+          uv run autopredict build-features
+
+      - name: Train, evaluate gate & (maybe) promote
+        id: train
+        run: |
+          set -o pipefail
+          uv run autopredict train | tee train.log
+          if grep -q "PROMOTED" train.log; then
+            echo "promoted=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "promoted=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate drift reports
+        run: uv run autopredict drift-report
+
+      - name: Version data & models (DVC push)
+        run: |
+          uv run dvc add data/raw data/processed models
+          uv run dvc push
+
+      - name: Upload drift reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: drift-reports
+          path: reports/*.html
+          if-no-files-found: ignore
+
+  redeploy:
+    name: Redeploy if a model was promoted
+    needs: retrain
+    if: needs.retrain.outputs.promoted == 'true'
+    uses: ./.github/workflows/cd.yml
+    secrets: inherit

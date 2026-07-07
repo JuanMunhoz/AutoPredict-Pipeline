@@ -1,0 +1,5 @@
+# Patterns DVC should ignore when tracking directories.
+*.tmp
+*.log
+.ipynb_checkpoints/
+__pycache__/

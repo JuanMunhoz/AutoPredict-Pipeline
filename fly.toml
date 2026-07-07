@@ -1,0 +1,41 @@
+# Fly.io deployment configuration for the AutoPredict API.
+# Rolling strategy + health checks give near-zero-downtime releases.
+# Deploy: `fly deploy --image ghcr.io/<owner>/autopredict-api:<tag>`
+
+app = "autopredict-api"
+primary_region = "gru"   # São Paulo
+
+[build]
+  # Image is built and pushed by CI (GHCR); Fly just pulls the tag.
+
+[env]
+  APP_ENV = "production"
+  APP_LOG_JSON = "true"
+  APP_API_PORT = "8000"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = "suspend"
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [http_service.concurrency]
+    type = "requests"
+    soft_limit = 80
+    hard_limit = 100
+
+[[http_service.checks]]
+  interval = "15s"
+  timeout = "3s"
+  grace_period = "10s"
+  method = "GET"
+  path = "/health"
+
+[deploy]
+  strategy = "rolling"       # replace machines one at a time
+  max_unavailable = 0.0      # keep full capacity during releases
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

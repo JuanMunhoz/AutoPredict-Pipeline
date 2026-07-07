@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.python-version
+
+# Environments & secrets
+.env
+.env.*
+!.env.example
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Data & models — versioned by DVC, never committed to git
+data/raw/*
+data/processed/*
+data/interim/*
+models/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/interim/.gitkeep
+!models/.gitkeep
+
+# MLflow / artifacts
+mlruns/
+mlartifacts/
+*.db
+
+# Monitoring reports
+reports/*.html
+!reports/.gitkeep
+
+# Notebooks checkpoints
+.ipynb_checkpoints/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log

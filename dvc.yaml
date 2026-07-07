@@ -1,0 +1,44 @@
+# DVC pipeline — a reproducible DAG of the ML stages.
+# `dvc repro` runs only the stages whose dependencies changed.
+# `dvc dag` visualises the graph.
+
+stages:
+  ingest:
+    cmd: autopredict ingest
+    deps:
+      - src/autopredict/ingestion
+      - configs/config.yaml
+    outs:
+      - data/raw/raw_btc.parquet
+      - data/raw/raw_sol.parquet
+
+  build_features:
+    cmd: autopredict build-features
+    deps:
+      - src/autopredict/features
+      - data/raw/raw_btc.parquet
+      - data/raw/raw_sol.parquet
+      - configs/config.yaml
+    outs:
+      - data/processed/features_btc.parquet
+      - data/processed/features_sol.parquet
+
+  train:
+    cmd: autopredict train
+    deps:
+      - src/autopredict/training
+      - src/autopredict/evaluation
+      - data/processed/features_btc.parquet
+      - data/processed/features_sol.parquet
+      - configs/model.yaml
+      - configs/config.yaml
+    outs:
+      - models/btc
+      - models/sol
+
+  drift_report:
+    cmd: autopredict drift-report
+    deps:
+      - src/autopredict/monitoring/drift.py
+      - data/processed/features_btc.parquet
+      - data/processed/features_sol.parquet
