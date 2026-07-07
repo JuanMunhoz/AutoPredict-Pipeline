@@ -501,7 +501,7 @@ tracking = [
 [package.metadata]
 requires-dist = [
     { name = "dvc", extras = ["s3"], marker = "extra == 'data'", specifier = ">=3.51" },
-    { name = "evidently", marker = "extra == 'monitoring'", specifier = ">=0.4.25" },
+    { name = "evidently", marker = "extra == 'monitoring'", specifier = ">=0.7,<0.8" },
     { name = "fastapi", marker = "extra == 'api'", specifier = ">=0.111" },
     { name = "httpx", specifier = ">=0.27" },
     { name = "joblib", specifier = ">=1.4" },
