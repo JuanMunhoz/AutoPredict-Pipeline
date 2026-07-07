@@ -324,6 +324,25 @@ leakage-safe labelling. Model: LightGBM. Split: chronological 80/20 holdout with
 | BTC   | 0.484 | 0.477 | 0.513 | ❌ **Rejected** |
 | SOL   | 0.492 | 0.489 | 0.520 | ❌ **Rejected** |
 
+<table>
+  <tr>
+    <td width="50%"><img src="docs/images/roc_curves.png" alt="ROC curves (holdout)"/></td>
+    <td width="50%"><img src="docs/images/feature_importance_btc.png" alt="BTC feature importances"/></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/images/price_series.png" alt="Normalised price series BTC vs SOL"/></td>
+    <td width="50%"><img src="docs/images/target_balance.png" alt="Target class balance"/></td>
+  </tr>
+</table>
+
+The ROC curves hug the diagonal — the visual proof of the near-random signal.
+Feature importances show the model leaning on **volatility** (`vol_24`, `atr_14`),
+**sentiment** (`fear_greed`) and classic **technicals** (`bb_width`, `macd`).
+
+**Data drift** (Evidently) is generated per asset into `reports/*.html`, comparing
+the training reference against recent data — e.g. a recent run flagged **79% of
+SOL features drifted**, exactly the kind of signal that should trigger a retrain.
+
 > ### Why rejected is the right outcome
 > Both models score around **AUC ≈ 0.5** — statistically indistinguishable from a
 > coin flip. That is the *expected* result: short-horizon crypto direction is

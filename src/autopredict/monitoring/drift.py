@@ -40,28 +40,31 @@ class DriftMonitor:
         self._threshold = drift_threshold
 
     def run(self, asset: str, reference: pd.DataFrame, current: pd.DataFrame) -> DriftSummary:
-        """Compute drift between reference and current feature frames."""
-        from evidently.metric_preset import DataDriftPreset
-        from evidently.report import Report
+        """Compute drift between reference and current feature frames (Evidently 0.7 API)."""
+        from evidently import DataDefinition, Dataset, Report
+        from evidently.presets import DataDriftPreset
 
         common = [c for c in reference.columns if c in current.columns]
-        ref, cur = reference[common], current[common]
+        definition = DataDefinition()
+        ref_ds = Dataset.from_pandas(reference[common], data_definition=definition)
+        cur_ds = Dataset.from_pandas(current[common], data_definition=definition)
 
-        report = Report(metrics=[DataDriftPreset(drift_share=self._threshold)])
-        report.run(reference_data=ref, current_data=cur)
+        report = Report([DataDriftPreset()])
+        run = report.run(cur_ds, ref_ds)  # (current, reference)
 
         stamp = datetime.now(tz=UTC).strftime("%Y%m%d_%H%M%S")
         report_path = self._dir / f"drift_{asset.lower()}_{stamp}.html"
-        report.save_html(str(report_path))
+        run.save_html(str(report_path))
 
-        result = report.as_dict()
-        drift = result["metrics"][0]["result"]
+        # The DataDriftPreset's first metric summarises drifted-column count/share.
+        summary_value = run.dict()["metrics"][0]["value"]
+        drift_share = float(summary_value["share"])
         summary = DriftSummary(
             asset=asset,
-            dataset_drift=bool(drift["dataset_drift"]),
-            drift_share=float(drift["share_of_drifted_columns"]),
-            n_drifted_features=int(drift["number_of_drifted_columns"]),
-            n_features=int(drift["number_of_columns"]),
+            dataset_drift=drift_share >= self._threshold,
+            drift_share=drift_share,
+            n_drifted_features=int(summary_value["count"]),
+            n_features=len(common),
             report_path=str(report_path),
         )
         logger.info(
