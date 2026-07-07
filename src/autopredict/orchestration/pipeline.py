@@ -155,7 +155,7 @@ def _maybe_registry(settings: Settings) -> Any | None:
         from autopredict.evaluation.mlflow_registry import MLflowModelRegistry
 
         return MLflowModelRegistry(settings.mlflow_experiment)
-    except Exception as exc:  # noqa: BLE001 - tracking is optional
+    except Exception as exc:
         logger.warning("mlflow_unavailable", detail=str(exc))
         return None
 

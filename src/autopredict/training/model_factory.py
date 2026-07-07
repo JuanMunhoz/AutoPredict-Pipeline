@@ -32,9 +32,7 @@ def _build_xgboost(params: dict[str, Any]) -> BaseEstimator:
 
 def _build_logreg(params: dict[str, Any]) -> BaseEstimator:
     # Linear models need scaling; wrap in a pipeline so callers stay uniform.
-    return Pipeline(
-        [("scaler", StandardScaler()), ("clf", LogisticRegression(**params))]
-    )
+    return Pipeline([("scaler", StandardScaler()), ("clf", LogisticRegression(**params))])
 
 
 _BUILDERS: dict[str, Callable[[dict[str, Any]], BaseEstimator]] = {
@@ -48,9 +46,7 @@ def build_estimator(model_config: dict[str, Any]) -> tuple[BaseEstimator, dict[s
     """Return ``(estimator, resolved_params)`` from a parsed model config."""
     name = model_config.get("estimator", "lightgbm")
     if name not in _BUILDERS:
-        raise ModelTrainingError(
-            f"Unknown estimator '{name}'. Available: {sorted(_BUILDERS)}"
-        )
+        raise ModelTrainingError(f"Unknown estimator '{name}'. Available: {sorted(_BUILDERS)}")
     params = dict(model_config.get(name, {}))
     estimator = _BUILDERS[name](params)
     return estimator, {"estimator": name, **params}

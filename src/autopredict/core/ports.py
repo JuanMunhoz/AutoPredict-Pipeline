@@ -67,7 +67,7 @@ class ModelRegistry(Protocol):
 class ModelLoader(Protocol):
     """Loads a servable model for inference."""
 
-    def load(self, asset: Asset) -> "Predictor":
+    def load(self, asset: Asset) -> Predictor:
         """Return a ready-to-serve predictor for the asset."""
         ...
 

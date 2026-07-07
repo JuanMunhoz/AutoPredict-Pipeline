@@ -11,11 +11,11 @@ from datetime import UTC, datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from autopredict.core.enums import Asset, Direction
+
 
 def _utcnow() -> datetime:
     return datetime.now(UTC)
-
-from autopredict.core.enums import Asset, Direction
 
 
 class OHLCV(BaseModel):

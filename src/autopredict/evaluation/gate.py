@@ -45,12 +45,16 @@ class PromotionGate:
 
         if candidate.roc_auc < self._t.min_roc_auc:
             return self._reject(
-                asset, candidate, incumbent_auc,
+                asset,
+                candidate,
+                incumbent_auc,
                 f"AUC {candidate.roc_auc:.4f} < min {self._t.min_roc_auc}",
             )
         if candidate.accuracy < self._t.min_accuracy:
             return self._reject(
-                asset, candidate, incumbent_auc,
+                asset,
+                candidate,
+                incumbent_auc,
                 f"accuracy {candidate.accuracy:.4f} < min {self._t.min_accuracy}",
             )
 
@@ -60,11 +64,15 @@ class PromotionGate:
         required = incumbent_auc + self._t.improvement_margin
         if candidate.roc_auc < required:
             return self._reject(
-                asset, candidate, incumbent_auc,
+                asset,
+                candidate,
+                incumbent_auc,
                 f"AUC {candidate.roc_auc:.4f} < incumbent+margin {required:.4f}",
             )
         return self._accept(
-            asset, candidate, incumbent_auc,
+            asset,
+            candidate,
+            incumbent_auc,
             f"AUC {candidate.roc_auc:.4f} beats incumbent {incumbent_auc:.4f}",
         )
 
@@ -73,8 +81,11 @@ class PromotionGate:
     ) -> PromotionDecision:
         logger.info("promotion_accepted", asset=asset.value, reason=reason, auc=m.roc_auc)
         return PromotionDecision(
-            asset=asset, promoted=True, reason=reason,
-            candidate_auc=m.roc_auc, incumbent_auc=incumbent,
+            asset=asset,
+            promoted=True,
+            reason=reason,
+            candidate_auc=m.roc_auc,
+            incumbent_auc=incumbent,
         )
 
     def _reject(
@@ -82,6 +93,9 @@ class PromotionGate:
     ) -> PromotionDecision:
         logger.warning("promotion_rejected", asset=asset.value, reason=reason, auc=m.roc_auc)
         return PromotionDecision(
-            asset=asset, promoted=False, reason=reason,
-            candidate_auc=m.roc_auc, incumbent_auc=incumbent,
+            asset=asset,
+            promoted=False,
+            reason=reason,
+            candidate_auc=m.roc_auc,
+            incumbent_auc=incumbent,
         )

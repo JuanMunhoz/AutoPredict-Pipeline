@@ -11,14 +11,21 @@ from autopredict.evaluation.gate import GateThresholds, PromotionGate
 
 def _metrics(auc: float, acc: float = 0.6) -> ModelMetrics:
     return ModelMetrics(
-        roc_auc=auc, accuracy=acc, precision=0.6, recall=0.6, f1=0.6,
-        log_loss=0.6, n_samples=100,
+        roc_auc=auc,
+        accuracy=acc,
+        precision=0.6,
+        recall=0.6,
+        f1=0.6,
+        log_loss=0.6,
+        n_samples=100,
     )
 
 
 @pytest.fixture
 def gate() -> PromotionGate:
-    return PromotionGate(GateThresholds(min_roc_auc=0.55, min_accuracy=0.52, improvement_margin=0.01))
+    return PromotionGate(
+        GateThresholds(min_roc_auc=0.55, min_accuracy=0.52, improvement_margin=0.01)
+    )
 
 
 def test_promotes_when_no_incumbent_and_thresholds_met(gate: PromotionGate) -> None:

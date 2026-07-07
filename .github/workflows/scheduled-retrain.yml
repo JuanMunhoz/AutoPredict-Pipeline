@@ -5,8 +5,11 @@ name: Scheduled Retrain
 # artifacts (DVC push) and trigger a redeploy.
 
 on:
-  schedule:
-    - cron: "0 */4 * * *"   # every 4 hours, matching the prediction horizon
+  # NOTE: the automatic 4h schedule is disabled until the required secrets are
+  # configured (S3_*, MLFLOW_TRACKING_URI, FLY_API_TOKEN). Without them every run
+  # fails and spams notifications. Re-enable by uncommenting the schedule below.
+  # schedule:
+  #   - cron: "0 */4 * * *"   # every 4 hours, matching the prediction horizon
   workflow_dispatch: {}
 
 permissions:

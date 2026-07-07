@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from enum import Enum
+from enum import Enum, StrEnum
 
 
-class Asset(str, Enum):
+class Asset(StrEnum):
     """Supported crypto assets."""
 
     BTC = "BTC"
@@ -19,12 +19,12 @@ class Direction(int, Enum):
     UP = 1
 
     @classmethod
-    def from_return(cls, forward_return: float, deadband: float = 0.0) -> "Direction":
+    def from_return(cls, forward_return: float, deadband: float = 0.0) -> Direction:
         """Map a forward return to a class label given a symmetric deadband."""
         return cls.UP if forward_return > deadband else cls.DOWN
 
 
-class Environment(str, Enum):
+class Environment(StrEnum):
     """Runtime environment."""
 
     DEVELOPMENT = "development"
@@ -32,7 +32,7 @@ class Environment(str, Enum):
     PRODUCTION = "production"
 
 
-class ModelStage(str, Enum):
+class ModelStage(StrEnum):
     """MLflow-style registry stages."""
 
     NONE = "None"

@@ -5,11 +5,14 @@ name: CD
 # pulled from the DVC remote (Supabase S3) prior to the build.
 
 on:
-  push:
-    branches: [main]
-    paths-ignore:
-      - "docs/**"
-      - "**/*.md"
+  # NOTE: auto-deploy on push is disabled until deploy secrets exist
+  # (FLY_API_TOKEN, S3_*). Without them the deploy step fails on every push.
+  # Re-enable the push trigger below once secrets are configured in the repo.
+  # push:
+  #   branches: [main]
+  #   paths-ignore:
+  #     - "docs/**"
+  #     - "**/*.md"
   workflow_dispatch: {}
 
 permissions:

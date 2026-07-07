@@ -41,11 +41,9 @@ class MLflowModelRegistry:
 
         name = self._registered_name(model.asset)
         with mlflow.start_run(run_name=run_name) as run:
-            mlflow.log_params({k: v for k, v in model.params.items()})
+            mlflow.log_params(dict(model.params.items()))
             mlflow.log_metrics(model.metrics.as_dict())
-            mlflow.set_tags(
-                {"asset": model.asset.value, "feature_count": len(model.feature_names)}
-            )
+            mlflow.set_tags({"asset": model.asset.value, "feature_count": len(model.feature_names)})
             info = mlflow.sklearn.log_model(
                 sk_model=model.estimator,
                 artifact_path="model",
@@ -60,7 +58,7 @@ class MLflowModelRegistry:
         name = self._registered_name(asset)
         try:
             versions = self._client.get_latest_versions(name, stages=[ModelStage.PRODUCTION.value])
-        except Exception as exc:  # noqa: BLE001 - registry may not exist yet
+        except Exception as exc:
             logger.info("no_production_model", asset=asset.value, detail=str(exc))
             return None
         if not versions:

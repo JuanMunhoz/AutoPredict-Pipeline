@@ -26,9 +26,7 @@ def test_label_matches_future_return(synthetic_ohlcv: pd.DataFrame) -> None:
     horizon = 4
     close = synthetic_ohlcv["close"]
     expected = (close.shift(-horizon) > close).astype(int).loc[label.index]
-    pd.testing.assert_series_equal(
-        label.astype(int), expected, check_names=False
-    )
+    pd.testing.assert_series_equal(label.astype(int), expected, check_names=False)
 
 
 def test_no_target_column_leaks_into_features(synthetic_ohlcv: pd.DataFrame) -> None:

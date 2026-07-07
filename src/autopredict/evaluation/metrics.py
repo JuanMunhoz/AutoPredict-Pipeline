@@ -29,5 +29,5 @@ def compute_metrics(
         recall=float(recall_score(y_true, y_pred, zero_division=0)),
         f1=float(f1_score(y_true, y_pred, zero_division=0)),
         log_loss=float("nan") if single_class else float(log_loss(y_true, y_proba)),
-        n_samples=int(len(y_true)),
+        n_samples=len(y_true),
     )

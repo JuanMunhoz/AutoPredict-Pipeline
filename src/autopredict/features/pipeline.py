@@ -12,7 +12,7 @@ information.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 import pandas as pd
@@ -42,7 +42,7 @@ class FeatureConfig:
     deadband: float = 0.0
 
     @classmethod
-    def from_yaml(cls, cfg: dict[str, Any]) -> "FeatureConfig":
+    def from_yaml(cls, cfg: dict[str, Any]) -> FeatureConfig:
         """Build from the parsed ``configs/config.yaml`` mapping."""
         feats = cfg.get("features", {})
         label = cfg.get("label", {})
@@ -110,8 +110,9 @@ class FeaturePipeline:
             out["fear_greed_change"] = raw["fear_greed_value"].astype(float).diff()
 
         # Calendar features (crypto trades 24/7 but flow differs by hour/day)
-        out["hour"] = raw.index.hour
-        out["dayofweek"] = raw.index.dayofweek
+        idx = cast("pd.DatetimeIndex", raw.index)
+        out["hour"] = idx.hour
+        out["dayofweek"] = idx.dayofweek
 
         return out.replace([np.inf, -np.inf], np.nan)
 
@@ -122,7 +123,7 @@ class FeaturePipeline:
         label = future_return.apply(
             lambda r: Direction.from_return(r, self._cfg.deadband).value if pd.notna(r) else np.nan
         )
-        return label.rename(TARGET_COLUMN)
+        return cast("pd.Series", label.rename(TARGET_COLUMN))
 
     def build_supervised(self, raw: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
         """Produce an aligned, leakage-safe (X, y) ready for training."""

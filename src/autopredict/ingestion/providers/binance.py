@@ -32,7 +32,9 @@ _COLUMNS = ["open", "high", "low", "close", "volume"]
 class BinanceProvider:
     """Implements :class:`autopredict.core.ports.MarketDataProvider`."""
 
-    def __init__(self, base_url: str, symbol_map: dict[Asset, str], **client_kwargs: object) -> None:
+    def __init__(
+        self, base_url: str, symbol_map: dict[Asset, str], **client_kwargs: object
+    ) -> None:
         self._symbol_map = symbol_map
         self._client = HttpClient(base_url, **client_kwargs)  # type: ignore[arg-type]
 
@@ -85,12 +87,21 @@ class BinanceProvider:
         frame = pd.DataFrame(
             rows,
             columns=[
-                "open_time", "open", "high", "low", "close", "volume",
-                "close_time", "quote_volume", "trades",
-                "taker_base", "taker_quote", "ignore",
+                "open_time",
+                "open",
+                "high",
+                "low",
+                "close",
+                "volume",
+                "close_time",
+                "quote_volume",
+                "trades",
+                "taker_base",
+                "taker_quote",
+                "ignore",
             ],
         )
         frame["timestamp"] = pd.to_datetime(frame["open_time"], unit="ms", utc=True)
-        frame = frame[["timestamp", *_COLUMNS]].astype({c: "float64" for c in _COLUMNS})
+        frame = frame[["timestamp", *_COLUMNS]].astype(dict.fromkeys(_COLUMNS, "float64"))
         frame = frame.drop_duplicates(subset="timestamp").set_index("timestamp").sort_index()
         return frame

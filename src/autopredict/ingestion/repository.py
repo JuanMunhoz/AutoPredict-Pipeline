@@ -39,7 +39,7 @@ class ParquetDatasetRepository:
         path = self._path(name)
         if not path.exists():
             raise DataValidationError(f"Dataset not found: {path}")
-        df = pd.read_parquet(path, engine="pyarrow")
+        df = pd.read_parquet(path)  # engine auto-selects the installed pyarrow
         logger.info("dataset_loaded", name=name, rows=len(df))
         return df
 

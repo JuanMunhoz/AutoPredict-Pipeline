@@ -19,7 +19,8 @@ def returns(close: pd.Series, periods: int = 1) -> pd.Series:
 
 def log_returns(close: pd.Series, periods: int = 1) -> pd.Series:
     """Log return over ``periods`` candles."""
-    return np.log(close / close.shift(periods))
+    ratio = close / close.shift(periods)
+    return pd.Series(np.log(ratio), index=close.index)
 
 
 def sma(close: pd.Series, window: int) -> pd.Series:
@@ -45,21 +46,15 @@ def rsi(close: pd.Series, period: int = 14) -> pd.Series:
     return result.where(avg_loss != 0.0, 100.0).where(avg_loss.notna(), np.nan)
 
 
-def macd(
-    close: pd.Series, fast: int = 12, slow: int = 26, signal: int = 9
-) -> pd.DataFrame:
+def macd(close: pd.Series, fast: int = 12, slow: int = 26, signal: int = 9) -> pd.DataFrame:
     """Moving Average Convergence Divergence: line, signal and histogram."""
     macd_line = ema(close, fast) - ema(close, slow)
     signal_line = macd_line.ewm(span=signal, adjust=False, min_periods=signal).mean()
     histogram = macd_line - signal_line
-    return pd.DataFrame(
-        {"macd": macd_line, "macd_signal": signal_line, "macd_hist": histogram}
-    )
+    return pd.DataFrame({"macd": macd_line, "macd_signal": signal_line, "macd_hist": histogram})
 
 
-def bollinger_bands(
-    close: pd.Series, window: int = 20, num_std: float = 2.0
-) -> pd.DataFrame:
+def bollinger_bands(close: pd.Series, window: int = 20, num_std: float = 2.0) -> pd.DataFrame:
     """Bollinger Bands plus the normalised %B position within the bands."""
     mid = sma(close, window)
     std = close.rolling(window=window, min_periods=window).std()
